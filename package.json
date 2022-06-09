@@ -1,0 +1,12 @@
+{
+    "id": "htz-signature",
+    "name": "canves 手写 签名 画板（开箱即用）",
+    "version": "0.0.3",
+    "description": "手写板功能，设置线条粗细、线条颜色、撤回、清空",
+    "keywords": [
+        "canves",
+        "手写",
+        "签名",
+        "画板"
+    ]
+}
