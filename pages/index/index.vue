@@ -1,14 +1,23 @@
 <template>
 	<view class="box">
-		<th-autograph></th-autograph>
+		<th-autograph 
+		:is-download="false" 
+		@submit="getFile" 
+		canvas-id="autograph">
+		</th-autograph>
 	</view>
 </template>
 
 <script>
-	import thAutograph from "../../components/th-autograph/index.vue"
+	import thAutograph from "../../components/th-autograph/th-autograph.vue"
 	export default {
 		components:{
 			thAutograph
+		},
+		methods:{
+			getFile(path){
+				console.log(path)
+			}
 		}
 	}
 </script>
