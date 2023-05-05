@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "th-color": "/components/th-autograph/th-color",
+    "th-line": "/components/th-autograph/th-line"
+  }
+}
