@@ -1,9 +1,17 @@
 <template>
-	<view class="autograph-box">
-		<canvas class="autograph" :canvas-id="canvasId" :id="canvasId" @touchstart="canvasStart($event)" @touchmove="canvasMove($event)">
+	<view class="autograph-box" :style="{'padding-bottom': bottomHeight + 'px'}">
+		<canvas
+		class="autograph"
+		v-show="canvasShow"
+		:class="{'hidden': !canvasShow}"
+		:canvas-id="canvasId"
+		:id="canvasId"
+		@touchstart="canvasStart($event)"
+		@touchmove="canvasMove($event)">
 			<view v-if="history.length==0" :class="['default-text',horizontalScreen?'rote-text':'']">绘制区域</view>
 		</canvas>
-		<view :class="['action-box',horizontalScreen?'horizontalScreen':'']">
+		<view v-show="!canvasShow" class="autograph" :class="{'hidden': canvasShow, 'rote-text': horizontalScreen }">配置中</view>
+		<view :class="['action-box',horizontalScreen?'rote-action':'']">
 			<view class="action-bar">
 				<view :class="[actionShow?'action-open':'action-close']">
 					<image src="../../static/th-autograph/pencli.svg" @click="openAction('thLine')" v-if="judge('pencli')"></image>
@@ -15,10 +23,10 @@
 				v-if="actionBar.length!=0"
 				:class="[actionShow?'roteRight':'roteLeft']"></image>
 			</view>
-			<view class="th-submit" @click="saveCanvas">确定</view>
+			<view class="th-submit" @click="saveCanvas" hover-class="hover-class">确定</view>
 		</view>
-		<th-color ref="thColor" @setColor="setColor"></th-color>
-		<th-line ref="thLine" @setLine="setLine"></th-line>
+		<th-color ref="thColor" @setColor="setColor" @closePop="canvasShow = true"></th-color>
+		<th-line ref="thLine" @setLine="setLine" @closePop="canvasShow = true"></th-line>
 	</view>
 </template>
 
@@ -85,19 +93,32 @@
 				actionShow:true,
 				history:[],
 				lineColor:"#000",
-				lineWidth:4
+				lineWidth:4,
+				canvasShow: true,
+				bottomHeight: 0
 			}
 		},
 		components:{
 			thColor,thLine
 		},
 		mounted () {
+			// #ifdef MP-WEIXIN
+			this.getIphoneBottom()
+			// #endif
 			this.lineColor = this.delineColor
 			this.lineWidth = this.delineWidth
 			const ctx = uni.createCanvasContext(this.canvasId,this)
 			this.context = ctx;
 		},
 		methods: {
+			getIphoneBottom() {
+				uni.getSystemInfo({
+				  success: res => {
+					const bottom = res.screenHeight - res.safeArea.bottom;
+					this.bottomHeight = bottom > 0 ? bottom - 10 : bottom
+				  }
+				})
+			},
 			//操作栏显示控制
 			judge(key) {
 				if(this.actionBar.includes(key)){
@@ -108,6 +129,7 @@
 			},
 			//打开选择器
 			openAction(ref) {
+				this.canvasShow = false
 				this.$refs[ref].checkModel()
 			},
 			//设置颜色
@@ -170,7 +192,7 @@
 							fail: err => {
 								reject(err)
 							}
-						}
+						},this
 					)
 				})
 			},
@@ -266,11 +288,26 @@
 </script>
 
 <style lang="scss" scoped>
+	.hidden {
+		height: 0 !important;
+		overflow: hidden;
+		border: 0 !important;
+	}
 	.autograph{
 		width: 100%;
-		height:100%;
+		height: 92%;
 		box-sizing: border-box;
 		border:1px dashed #ccc;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 38upx;
+		color: #C0C0C0;
+	}
+	.config {
+		width: 100%;
+		height: 92%;
+		background-color: red;
 	}
 	.horizontalScreen{
 		left: -150upx !important;
@@ -282,43 +319,58 @@
 	.rote-text{
 		transform:rotate(90deg);
 	}
+	.rote-action {
+		transform:rotate(180deg);
+		padding-top: 0 !important;
+		.th-submit {
+			transform:rotate(-90deg);
+			width: 120upx !important;
+			height: 100% !important;
+		}
+	}
 	.action-box{
-		position: absolute;
-		bottom: 0;
-		right: 0;
+		height: 8%;
 		z-index: 50;
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		align-items: flex-end;
+		justify-content: flex-end;
+		box-sizing: border-box;
+		padding-top: 20upx;
 	}
 	.th-submit{
 		width: 150upx;
-		height: 100upx;
+		height: 100%;
 		background-color: #5667F5;
-		border-radius: 70upx 0 0 0;
+		border-radius: 50upx 0 0 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		color: #FFFFFF;
 		font-size: 30upx;
+		transition: all 0.3s;
 	}
 	.action-bar{
-		margin-bottom: 30upx;
 		margin-right: 35upx;
+		align-items: center;
+		display: flex;
+		height: 100%;
+		align-items: center;
 		image{
-			width: 40upx;
-			height: 40upx;
+			width: 35upx;
+			height: 35upx;
 		}
 		>image{
 			transition: all 0.3s;
 		}
 		>view{
 			display: flex;
-			flex-direction: column;
+			flex-direction: row;
+			align-items: center;
 			image{
 				width: 40upx;
 				height: 40upx;
-				margin-bottom: 52upx;
+				margin-right: 60upx;
 			}
 		}
 	}
@@ -326,6 +378,7 @@
 		width: 100%;
 		height: 100%;
 		position: relative;
+		box-sizing: border-box;
 		.default-text{
 			width: 100%;
 			height: 100%;
@@ -417,5 +470,8 @@
 			transform: scale3d(.3, .3, .3);
 			display: none;
 		}
+	}
+	.hover-class {
+		opacity: 0.6;
 	}
 </style>

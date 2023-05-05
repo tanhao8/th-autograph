@@ -22,10 +22,14 @@
 		methods:{
 			checkModel() {
 				this.lineShow = !this.lineShow;
+				if(!this.lineShow) {
+					this.$emit('closePop')
+				}
 			},
 			checkline(item) {
 				this.lineShow = false;
 				this.$emit('setLine',item)
+				this.$emit('closePop')
 			}
 		}
 	}

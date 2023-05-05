@@ -29,12 +29,16 @@
 		methods:{
 			checkModel() {
 				this.colorShow = !this.colorShow;
+				if(!this.colorShow) {
+					this.$emit('closePop')
+				}
 			},
 			//选择颜色
 			checkColor(item) {
 				this.checkItem = item;
 				this.colorShow = false;
 				this.$emit('setColor',item)
+				this.$emit('closePop')
 			}
 		}
 	}
